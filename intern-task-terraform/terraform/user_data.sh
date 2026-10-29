@@ -26,9 +26,27 @@ git clone --branch intern-task-app-solution --depth 1 https://github.com/JoshOgo
 cd /opt/challenge/intern-task-app
 docker build -t intern-task-app:local .
 
-# Run the app on port 5000 and restart it if Docker restarts.
-docker run -d \
-  --name intern-task-app \
-  --restart unless-stopped \
-  -p 5000:5000 \
-  intern-task-app:local
+# Create a systemd service to manage the application container.
+cat > /etc/systemd/system/intern-task-app.service <<'EOF'
+[Unit]
+Description=Task 1 application container
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+ExecStartPre=-/usr/bin/docker rm -f intern-task-app
+ExecStart=/usr/bin/docker run --rm --name intern-task-app -p 5000:5000 intern-task-app:local
+ExecStop=/usr/bin/docker stop --time 10 intern-task-app
+ExecStopPost=-/usr/bin/docker rm -f intern-task-app
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Reload systemd and enable/start the service immediately.
+systemctl daemon-reload
+systemctl enable --now intern-task-app.service
