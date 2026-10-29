@@ -34,7 +34,9 @@ jobs:
           terraform_version: "1.12.0"
 
       - name: Format check
-        run: terraform fmt -check -recursive
+        run: |
+          terraform version
+          terraform fmt -check -diff -recursive
 
       - name: Initialize
         run: terraform init -input=false
