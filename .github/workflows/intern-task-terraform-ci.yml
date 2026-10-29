@@ -13,6 +13,9 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./intern-task-terraform
     env:
       # Fake, not secret — these never touch a real AWS account. They only
       # work because the module's provider block sets skip_credentials_validation
